@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>観光・防災マップ</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- 自サイトのCSS -->
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+
+<body>
+  <!-- 最初のローディング表示 -->
+  <section id="loading" class="view">
+    <i class="initial-loading-icon fas fa-sync" aria-hidden="true"></i>
+  </section>
+  <!-- /#loading -->
+
+  <!-- ログイン画面 -->
+  <section id="login" class="view">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-8 col-lg-6">
+          <form id="login-form">
+            <div class="form-group login__email">
+              <label for="login-email" class="col-form-label">
+                メールアドレス
+              </label>
+              <div>
+                <input id="login-email" type="email" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group login__password">
+              <label for="login-password" class="col-form-label">
+                パスワード
+              </label>
+              <div>
+                <input id="login-password" type="password" class="form-control" required>
+              </div>
+            </div>
+            <div id="login__help" class="alert alert-danger"></div>
+            <div class="form-group login__submit">
+              <div>
+                <button id="login__submit-button" type="submit" class="btn btn-success">
+                  ログイン
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- /#login -->
+
+  <!-- 観光マップ覧画面 -->
+  <section id="mapInfo" class="view">
+    <header>
+      <div id="header">
+        <div id="logo" style="width:60%">
+          <!-- <a href="./mapinfo_index.php" -->
+          <a href="./index.html"><img src="./images/sightseeing.png" alt="MapInfo" width="20%" height="20%"></a>
+        </div>
+        <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation();">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i>
+          観光スポットの登録
+        </a>
+        <button class="btn btn-primary logout-button">
+          ログアウト
+        </button>
+      </div>
+    </header>
+    <div id="cover">
+      <h1 id="cover__title">観光スポット共有アプリ</h1>
+    </div>
+    <div class="wrapper">
+      <div id="main">
+        <div id="map-list" class="clearfix"></div>
+      </div>
+    </div>
+  </section>
+  <!-- /#mapInfo -->
+
+  <div id="map-template">
+    <!-- 書籍のテンプレート -->
+    <div class="map-item">
+      <div class="map-item__image-wrapper">
+        <img class="map-item__image" alt="">
+      </div>
+      <div class="map-item__detail">
+        <div class="map-item__title"></div>
+        <div class="map-item__delete-wrapper">
+          <button class="btn btn-danger map-item__delete">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+            削除
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- /.map-item -->
+  </div>
+  
+  <div id="map"></div><!-- 地図を表示する div 要素（id="map"）-->
+  <div id="result"></div><!-- 地図を表示する div 要素（id="map"）-->
+
+  <!-- 書籍情報追加モーダル -->
+  <div id="add-map-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">観光スポットの登録</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body m-1">
+          <form id="map-form">
+            <div class="form-group row">
+              <label for="add-map-title" class="col-md-3  col-form-label">タイトル</label>
+              <div class="col-md-9">
+                <input id="add-map-title" type="text" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="add-map-comment" class="col-md-3  col-form-label">コメント</label>
+              <div class="col-md-9">
+                <input id="add-map-comment" type="text" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group row" hidden>
+              <label for="add-map-lat" class="col-md-3  col-form-label">緯度</label>
+              <div class="col-md-9">
+                <input id="add-map-lat" type="number" class="form-control" step="0.0000001"  required>
+              </div>
+            </div>
+            <div class="form-group row" hidden>
+              <label for="add-map-lng" class="col-md-3  col-form-label">経度</label>
+              <div class="col-md-9">
+                <input id="add-map-lng" type="number" class="form-control" step="0.0000001" required>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="add-map-category" class="col-md-3  col-form-label">カテゴリー</label>
+              <div class="col-md-9">
+                <select class="form-control" id="add-map-category">
+                  <option>グルメ</option>
+                  <option>自然</option>
+                  <option>観光施設</option>
+                  <option>季節の景色</option>
+                  <option>宿泊施設</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-3">投稿画像</div>
+              <div class="col-md-9">
+                <div class="custom-file">
+                  <input id="add-map-image" type="file" accept=".jpg,.jpeg,.png,.gif, image/jpeg,image/png,image/gif"
+                    class="custom-file-input" required>
+                  <label id="add-map-image-label" class="custom-file-label" for="add-map-image">ファイルを選択</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row" style="text-align: center;">
+              <video id="player" controls autoplay width=100% height=100% ></video>
+            </div>
+            <div style="text-align: right;">
+              <button id="capture" type="button" class="btn btn-success" >撮影</button></button>
+            </div>
+            <div style="text-align: center;">
+              <canvas id="snapshot" ></canvas>
+            </div>
+            <div style="text-align: center;">
+              <img id="img">
+            </div>
+            
+            
+            <div id="add-map__help" class="alert alert-danger"></div>
+            <button id="submit_add_map" type="submit" class="btn btn-default btn-success btn-block">
+              保存する
+            </button>
+        </div>
+        </form>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+  </div>
+  <!-- /#add-map-modal -->
+
+  <!-- Firebaseのセットアップコード（下記のSDKのバージョンは6.2.0） -->
+  <!-- The core Firebase JS SDK is always required and must be listed first 
+    (中心となるFirebase SDKです。常に必要で、最初に記述する必要があります) -->
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-storage.js"></script>
+  
+  <script>
+    // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyAyCWb6IihvFQUxL9I6XPPEEZt4ETDbN9o",
+    authDomain: "map-965b2.firebaseapp.com",
+    databaseURL: "https://map-965b2.firebaseio.com",
+    projectId: "map-965b2",
+    storageBucket: "map-965b2.appspot.com",
+    messagingSenderId: "148542013923",
+    appId: "1:148542013923:web:06a9d37ef61fa83c2260d6",
+    measurementId: "G-ZWPYSPGRNY"
+    };
+  // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  
+  
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+    <!-- Popper.js, 次に Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"></script>
+  
+  
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDF5PuH_ciFSm43CDhMaLPNUVwicYWBDEI&callback=initMap" async defer></script>
+  
+
+
+
+</body>
+
+</html>
