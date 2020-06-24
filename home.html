@@ -60,13 +60,17 @@
   <section id="mapInfo" class="view">
     <header>
       <div id="header">
-        <div id="logo" style="width:60%">
+        <div id="logo" style="width:30%">
           <!-- <a href="./mapinfo_index.php" -->
-          <a href="./index.html"><img src="./images/sightseeing.png" alt="MapInfo" width="20%" height="20%"></a>
+          <a href="./index.html"><img src="./images/sightseeing.png" alt="MapInfo" width="40%" height="40%"></a>
         </div>
-        <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation();">
+        <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation(); cameraOn();">
           <i class="fas fa-plus-circle" aria-hidden="true"></i>
-          観光スポットの登録
+          思い出の記録
+        </a>
+        <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation(); cameraOn();">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i>
+          町をよくするご提案
         </a>
         <button class="btn btn-primary logout-button">
           ログアウト
@@ -84,6 +88,7 @@
   </section>
   <!-- /#mapInfo -->
 
+  
   <div id="map-template">
     <!-- 書籍のテンプレート -->
     <div class="map-item">
@@ -111,8 +116,8 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">観光スポットの登録</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <h4 class="modal-title">思い出の記録</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closebutton">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>

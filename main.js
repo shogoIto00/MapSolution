@@ -6,6 +6,9 @@
 //マップで表示するアイコン
 var image_food = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Ffood-donation.png?alt=media&token=b9fc64b2-7ad1-4be4-8980-83c9cc0e17d4';
 var image_season = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fseason.png?alt=media&token=09e68168-6d8a-4688-8f65-e3a747e8216d';
+var image_nature = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Friver.png?alt=media&token=57ac25fe-deef-439f-90d7-f291c1ac6aa9';
+var image_landmark = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fsightseeing_spot.png?alt=media&token=f443f78a-adec-426f-9c9b-4585e60ad2e3';
+var image_hotels = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fhotel.png?alt=media&token=78edb105-70f1-4339-939d-09f754363b7b';
 /*var icon_food = {
   url: image_food,
   // This marker is 20 pixels wide by 32 pixels high.
@@ -21,8 +24,14 @@ const addMarkerOnMap = (mapId, mapData, map) => {
   var marker ;
   if (mapData.mapCategory == 'グルメ') {
     marker = new google.maps.Marker({position: marker_var, map: map, icon: {url: image_food, scaledSize: new google.maps.Size(40, 40)},});
-  } else{
+  } else if(mapData.mapCategory == '自然'){
+    marker = new google.maps.Marker({position: marker_var, map: map, icon: {url: image_nature, scaledSize: new google.maps.Size(40, 40)},});
+  } else if(mapData.mapCategory == '季節の景色'){
     marker = new google.maps.Marker({position: marker_var, map: map, icon: {url: image_season, scaledSize: new google.maps.Size(40, 40)},});
+  } else if(mapData.mapCategory == '観光施設'){
+    marker = new google.maps.Marker({position: marker_var, map: map, icon: {url: image_landmark, scaledSize: new google.maps.Size(40, 40)},});
+  } else if(mapData.mapCategory == '宿泊施設'){
+    marker = new google.maps.Marker({position: marker_var, map: map, icon: {url: image_hotels, scaledSize: new google.maps.Size(40, 40)},});
   }
 
   var contentString = '<div id="content">'+
@@ -503,7 +512,7 @@ function getLocation() {
     	// [第3引数] オプション
     	{
     		"enableHighAccuracy": false,
-    		"timeout": 8000,
+    		"timeout": 12000,
     		"maximumAge": 2000,
     	}
   
@@ -539,11 +548,17 @@ var blob ;
 var base64format;
 var handleSuccess = function(stream) {
 // Attach the video stream to the video element and autoplay.
+  // 一回投稿を行ったらcanvas上にデータが投稿されるので、snapshotの部分を隠しておく
+  $('#snapshot').hide();
   player.srcObject = stream;
   videoTracks = stream.getVideoTracks();
+  //一回登録した場合は隠れているのでshowで表示させる
+  $('#player').show();
+  $('#capture').show();
 };
 
 captureButton.addEventListener('click', function() {
+  
   context = snapshot.getContext('2d');
   // Draw the video frame to the canvas.
   $('#snapshot').attr('width', player.videoWidth*0.6);
@@ -555,6 +570,8 @@ captureButton.addEventListener('click', function() {
   videoTracks.forEach(function(track) {track.stop()});
   $('#player').hide();
   $('#capture').hide();
+  //snapshotは隠しているので、ここで表示する
+  $('#snapshot').show();
   
   //339行目で使用
   var type = 'image/png';
@@ -575,7 +592,16 @@ captureButton.addEventListener('click', function() {
   console.log('blob: ' + blob);
 });
 
-navigator.mediaDevices.getUserMedia({video: true})
-  .then(handleSuccess);
+function cameraOn(){
+  navigator.mediaDevices.getUserMedia({video: true})
+    .then(handleSuccess);
+}
 
 var video = document.querySelector('#video');
+
+
+//×ボタンを押して投稿せずに画面を閉じたときにもカメラをオフにするための機能
+$('#closebutton').on('click', function() {
+  // カメラへのアクセスを止める
+  videoTracks.forEach(function(track) {track.stop()});
+});
