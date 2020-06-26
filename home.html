@@ -10,75 +10,88 @@
 
   <!-- 自サイトのCSS -->
   <link rel="stylesheet" type="text/css" href="main.css">
+  
+  <!-- ファビコン  -->
+  <link rel="shortcut icon" href="./images/favicon.ico">
 </head>
 
 <body>
-  <!-- 最初のローディング表示 -->
-  <section id="loading" class="view">
-    <i class="initial-loading-icon fas fa-sync" aria-hidden="true"></i>
-  </section>
-  <!-- /#loading -->
-
-  <!-- ログイン画面 -->
-  <section id="login" class="view">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-sm-10 col-md-8 col-lg-6">
-          <form id="login-form">
-            <div class="form-group login__email">
-              <label for="login-email" class="col-form-label">
-                メールアドレス
-              </label>
-              <div>
-                <input id="login-email" type="email" class="form-control" required>
+  
+  
+  <!-- ログイン画面モーダル -->
+  <div id="login-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-login">ログイン</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="login-closebutton">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body m-1">
+          <form id="login-form-mordal">
+            <div class="form-group row">
+              <label for="login-email-modal" class="col-md-3  col-form-label">メールアドレス</label>
+              <div class="col-md-9">
+                <input id="login-email-modal" type="email" class="form-control" required>
               </div>
             </div>
-            <div class="form-group login__password">
-              <label for="login-password" class="col-form-label">
-                パスワード
-              </label>
-              <div>
-                <input id="login-password" type="password" class="form-control" required>
+            <div class="form-group row">
+              <label for="login-password-modal" class="col-md-3  col-form-label">パスワード</label>
+              <div class="col-md-9">
+                <input id="login-password-modal" type="password" class="form-control" required>
               </div>
             </div>
             <div id="login__help" class="alert alert-danger"></div>
-            <div class="form-group login__submit">
-              <div>
-                <button id="login__submit-button" type="submit" class="btn btn-success">
-                  ログイン
-                </button>
-              </div>
+              <button id="submit_login_modal" type="submit" class="btn btn-default btn-success btn-block">
+                ログイン
+              </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
-  </section>
-  <!-- /#login -->
+    <!-- /.modal-content -->
+    </div> 
+  <!-- /.modal-dialog -->
+  </div>
+  
 
   <!-- 観光マップ覧画面 -->
-  <section id="mapInfo" class="view">
+  <section id="mapInfo" class="view-fixed">
     <header>
       <div id="header">
         <div id="logo" style="width:30%">
           <!-- <a href="./mapinfo_index.php" -->
           <a href="./index.html"><img src="./images/sightseeing.png" alt="MapInfo" width="40%" height="40%"></a>
         </div>
+        <div id="add-info">
         <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation(); cameraOn();">
           <i class="fas fa-plus-circle" aria-hidden="true"></i>
           思い出の記録
         </a>
-        <a href="#add-map-modal" data-toggle="modal" class="add-button" onclick="getLocation(); cameraOn();">
+        </div>
+        <!--
+        <div id="add-opinion">
+        <a href="#add-inprovement-modal" data-toggle="modal" class="add-button" onclick="getLocation(); cameraOn();">
           <i class="fas fa-plus-circle" aria-hidden="true"></i>
           町をよくするご提案
-        </a>
+        </a> 
+        </div>
+        -->
+        <div id="login-modal-button">
+        <button class="btn btn-primary login-button">
+          ログイン
+        </button>
+        </div>
+        <div id="logout-modal-button">
         <button class="btn btn-primary logout-button">
           ログアウト
         </button>
+        </div>
       </div>
     </header>
     <div id="cover">
-      <h1 id="cover__title">観光スポット共有アプリ</h1>
+      <h1 id="cover__title">観光情報共有アプリ</h1>
     </div>
     <div class="wrapper">
       <div id="main">
@@ -88,6 +101,9 @@
   </section>
   <!-- /#mapInfo -->
 
+  <div id="map" >
+  </div><!-- 地図を表示する div 要素（id="map"）-->
+  <!-- <div id="result"></div> 地図を表示する div 要素（id="map"）-->
   
   <div id="map-template">
     <!-- 書籍のテンプレート -->
@@ -97,6 +113,7 @@
       </div>
       <div class="map-item__detail">
         <div class="map-item__title"></div>
+        <div class="map-item__comment"></div>
         <div class="map-item__delete-wrapper">
           <button class="btn btn-danger map-item__delete">
             <i class="fas fa-trash-alt" aria-hidden="true"></i>
@@ -108,10 +125,65 @@
     <!-- /.map-item -->
   </div>
   
-  <div id="map"></div><!-- 地図を表示する div 要素（id="map"）-->
-  <div id="result"></div><!-- 地図を表示する div 要素（id="map"）-->
+  <!-- アイコンの情報を表示 -->
+  <div class="icon-template">
+    
+    <!-- グルメ -->
+    <div class="icon-item">
+      <div class="icon-item__image-wrapper">
+        <img width="10%" height="10%" src="https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Ffood-donation.png?alt=media&token=b9fc64b2-7ad1-4be4-8980-83c9cc0e17d4" class="icon-item__image" alt="グルメ">
+      </div>
+      <div class="icon-item__detail">
+        <div class="icon-item__title">グルメ</div>
+      </div>
+    </div>
+    
+    <!-- 自然 -->
+    <div class="icon-item">
+      <div class="icon-item__image-wrapper">
+        <img width="10%" height="10%" src="https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Friver.png?alt=media&token=57ac25fe-deef-439f-90d7-f291c1ac6aa9" class="icon-item__image" alt="グルメ">
+      </div>
+      <div class="icon-item__detail">
+        <div class="icon-item__title">自然</div>
+      </div>
+    </div>
+    
+    <!-- 観光施設 -->
+    <div class="icon-item">
+      <div class="icon-item__image-wrapper">
+        <img width="20%" height="20%" src="https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fsightseeing_spot.png?alt=media&token=f443f78a-adec-426f-9c9b-4585e60ad2e3" class="icon-item__image" alt="グルメ">
+      </div>
+      <div class="icon-item__detail">
+        <div class="icon-item__title">観光施設</div>
+      </div>
+    </div>
+    
+    <!-- 季節の景色 -->
+    <div class="icon-item">
+      <div class="icon-item__image-wrapper">
+        <img width="10%" height="10%" src="https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fseason.png?alt=media&token=09e68168-6d8a-4688-8f65-e3a747e8216d" class="icon-item__image" alt="グルメ">
+      </div>
+      <div class="icon-item__detail">
+        <div class="icon-item__title">季節の景色</div>
+      </div>
+    </div>
+    
+    <!-- 宿泊施設 -->
+    <div class="icon-item">
+      <div class="icon-item__image-wrapper">
+        <img width="10%" height="10%" src="https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fhotel.png?alt=media&token=78edb105-70f1-4339-939d-09f754363b7b" class="icon-item__image" alt="グルメ">
+      </div>
+      <div class="icon-item__detail">
+        <div class="icon-item__title">宿泊施設</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ここまででアイコンの情報を表示 -->
+  
+  
 
-  <!-- 書籍情報追加モーダル -->
+  <!-- 思い出情報追加モーダル -->
   <div id="add-map-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -159,6 +231,7 @@
                 </select>
               </div>
             </div>
+            <!--
             <div class="form-group row">
               <div class="col-md-3">投稿画像</div>
               <div class="col-md-9">
@@ -169,6 +242,7 @@
                 </div>
               </div>
             </div>
+            -->
             <div class="form-group row" style="text-align: center;">
               <video id="player" controls autoplay width=100% height=100% ></video>
             </div>
@@ -196,6 +270,81 @@
   <!-- /.modal-dialog -->
   </div>
   <!-- /#add-map-modal -->
+  
+  <!-- 思い出情報追加モーダル -->
+  <!--
+  <div id="add-inprovement-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">街をよくするご提案</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closebutton">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body m-1">
+          <form id="inprovement-form">
+            <div class="form-group row">
+              <label for="add-inprovement-title" class="col-md-3  col-form-label">タイトル</label>
+              <div class="col-md-9">
+                <input id="add-inprovement-title" type="text" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="add-inprovement-comment" class="col-md-3  col-form-label">コメント</label>
+              <div class="col-md-9">
+                <input id="add-inprovement-comment" type="text" class="form-control" required>
+            </div>
+            </div>
+            <div class="form-group row" hidden>
+              <label for="add-inprovement-lat" class="col-md-3  col-form-label">緯度</label>
+              <div class="col-md-9">
+                <input id="add-inprovement-lat" type="number" class="form-control" step="0.0000001"  required>
+              </div>
+            </div>
+            <div class="form-group row" hidden>
+              <label for="add-inprovement-lng" class="col-md-3  col-form-label">経度</label>
+              <div class="col-md-9">
+                <input id="add-inprovement-lng" type="number" class="form-control" step="0.0000001" required>
+              </div>
+            </div>
+            <div class="form-inprovement row">
+              <label for="add-inprovement-category" class="col-md-3  col-form-label">カテゴリー</label>
+              <div class="col-md-9">
+                <select class="form-control" id="add-inprovement-category">
+                  <option>景観の問題</option>
+                  <option>道路の不備</option>
+                  <option>動物の死骸</option>
+                  <option>バリアフリー</option>
+                  <option>ダイバーシティー</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group row" style="text-align: center;">
+              <video id="player-inprovement" controls autoplay width=100% height=100% ></video>
+            </div>
+            <div style="text-align: right;">
+              <button id="capture-inprovement" type="button" class="btn btn-success" >撮影</button></button>
+            </div>
+            <div style="text-align: center;">
+              <canvas id="snapshot-inprovement" ></canvas>
+            </div>
+            <div style="text-align: center;">
+              <img id="img-inprovement">
+            </div>
+            
+            
+            <div id="add-improvement__help" class="alert alert-danger"></div>
+            <button id="submit_add_map" type="submit" class="btn btn-default btn-success btn-block">
+              保存する
+            </button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+  -->
 
   <!-- Firebaseのセットアップコード（下記のSDKのバージョンは6.2.0） -->
   <!-- The core Firebase JS SDK is always required and must be listed first 

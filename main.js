@@ -9,6 +9,12 @@ var image_season = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspo
 var image_nature = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Friver.png?alt=media&token=57ac25fe-deef-439f-90d7-f291c1ac6aa9';
 var image_landmark = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fsightseeing_spot.png?alt=media&token=f443f78a-adec-426f-9c9b-4585e60ad2e3';
 var image_hotels = 'https://firebasestorage.googleapis.com/v0/b/map-965b2.appspot.com/o/icon%2Fhotel.png?alt=media&token=78edb105-70f1-4339-939d-09f754363b7b';
+
+
+//初期値
+// 現在ログインしているユーザID
+let currentUID;
+
 /*var icon_food = {
   url: image_food,
   // This marker is 20 pixels wide by 32 pixels high.
@@ -86,10 +92,10 @@ const displayMapImage = ($divTag, url) => {
   });
 };
 
-// Realtime Database の maps から書籍を削除する
+// Realtime Database の maps か投稿を削除する
 const deleteMap = (mapId) => {
   // TODO: maps から該当の書籍データを削除
-  var data_for_delete = firebase.database().ref('maps/'+ mapId);
+  var data_for_delete = firebase.database().ref(`maps/${currentUID}/`+ mapId);
   data_for_delete.remove()
     .then(function() {
       console.log("Remove succeeded.")
@@ -106,6 +112,7 @@ const createMapDiv = (mapId, mapData) => {
 
   // 投稿タイトルを表示する
   $divTag.find('.map-item__title').text(mapData.mapTitle);
+  $divTag.find('.map-item__comment').text(mapData.mapComment);
 
   // 投稿の表紙画像をダウンロードして表示する
   downloadMapImage(mapData.mapImageLocation).then((url) => {
@@ -124,7 +131,7 @@ const createMapDiv = (mapId, mapData) => {
   return $divTag;
 };
 
-// 書籍一覧画面内の書籍データをクリア
+//投稿籍一覧画面内の投稿データをクリア
 const resetMapinfofView = () => {
   $('#map-list').empty();
 };
@@ -135,14 +142,14 @@ const addMap = (mapId, mapData) => {
   $divTag.appendTo('#map-list');
 };
 
-// 書籍一覧画面の初期化、イベントハンドラ登録処理
+// 投稿画面の初期化、イベントハンドラ登録処理
 const loadMapinfoView = () => {
   resetMapinfofView();
 
-  // 書籍データを取得
+  //投稿データを取得
   const mapsRef = firebase
     .database()
-    .ref('maps')
+    .ref(`maps/${currentUID}/` )
     .orderByChild('createdAt');
 
   // 過去に登録したイベントハンドラを削除
@@ -155,7 +162,7 @@ const loadMapinfoView = () => {
     const mapId = mapSnapshot.key;
     const $map = $(`#map-id-${mapId}`);
 
-    // TODO: 書籍一覧画面から該当の書籍データを削除する
+    // 投稿一覧画面から該当の書籍データを削除する
     $map.remove();
 
   });
@@ -165,6 +172,7 @@ const loadMapinfoView = () => {
   mapsRef.on('child_added', (mapSnapshot) => {
     const mapId = mapSnapshot.key;
     const mapData = mapSnapshot.val();
+    console.log(mapId);
 
     // 書籍一覧画面に書籍データを表示する
     addMap(mapId, mapData);
@@ -197,7 +205,7 @@ const showView = (id) => {
 // ログインフォームを初期状態に戻す
 const resetLoginForm = () => {
   $('#login__help').hide();
-  $('#login__submit-button')
+  $('#submit_login_modal')
     .prop('disabled', false)
     .text('ログイン');
 };
@@ -205,8 +213,13 @@ const resetLoginForm = () => {
 // ログインした直後に呼ばれる
 const onLogin = () => {
   console.log('ログイン完了');
+  $('#login-modal-button').hide();
+  //$('#login-modal').hide();
+  $('#logout-modal-button').show();
+  $('#add-info').show();
+  $('#add-opinion').show();
 
-  // 書籍一覧画面を表示
+  // 投稿一覧画面を表示
   showView('mapInfo');
 };
 
@@ -217,9 +230,89 @@ const onLogout = () => {
   // 過去に登録したイベントハンドラを削除
   mapsRef.off('child_removed');
   mapsRef.off('child_added');
-
-  showView('login');
+  //この部分は必要無い。画面自体を変える必要はなく、データを消せばそれでいいため
+  //showView('login');
+  
+  $('#login-modal-button').show();
+  $('#logout-modal-button').hide();
+  $('#add-info').hide();
+  $('#add-opinion').hide();
 };
+
+// ユーザ作成のときパスワードが弱すぎる場合に呼ばれる
+const onWeakPassword = () => {
+  resetLoginForm();
+  $('#login__password').addClass('has-error');
+  $('#login__help')
+    .text('6文字以上のパスワードを入力してください')
+    .fadeIn();
+};
+
+// ログインのときパスワードが間違っている場合に呼ばれる
+const onWrongPassword = () => {
+  resetLoginForm();
+  $('#login__password').addClass('has-error');
+  $('#login__help')
+    .text('正しいパスワードを入力してください')
+    .fadeIn();
+};
+
+// ログインのとき試行回数が多すぎてブロックされている場合に呼ばれる
+const onTooManyRequests = () => {
+  resetLoginForm();
+  $('#login__submit-button').prop('disabled', true);
+  $('#login__help')
+    .text('試行回数が多すぎます。後ほどお試しください。')
+    .fadeIn();
+};
+
+// ログインのときメールアドレスの形式が正しくない場合に呼ばれる
+const onInvalidEmail = () => {
+  resetLoginForm();
+  $('#login__email').addClass('has-error');
+  $('#login__help')
+    .text('メールアドレスを正しく入力してください')
+    .fadeIn();
+};
+
+// その他のログインエラーの場合に呼ばれる
+const onOtherLoginError = () => {
+  resetLoginForm();
+  $('#login__help')
+    .text('ログインに失敗しました')
+    .fadeIn();
+};
+
+// ユーザ作成に失敗したことをユーザに通知する
+const catchErrorOnCreateUser = (error) => {
+  // 作成失敗
+  console.error('ユーザ作成に失敗:', error);
+  if (error.code === 'auth/weak-password') {
+    onWeakPassword();
+  } else {
+    // その他のエラー
+    onOtherLoginError(error);
+  }
+};
+
+// ログインに失敗したことをユーザーに通知する
+const catchErrorOnSignIn = (error) => {
+  if (error.code === 'auth/wrong-password') {
+    // パスワードの間違い
+    onWrongPassword();
+  } else if (error.code === 'auth/too-many-requests') {
+    // 試行回数多すぎてブロック中
+    onTooManyRequests();
+  } else if (error.code === 'auth/invalid-email') {
+    // メールアドレスの形式がおかしい
+    onInvalidEmail();
+  } else {
+    // その他のエラー
+    onOtherLoginError(error);
+  }
+};
+
+
 
 /**
  * ------------------
@@ -232,24 +325,29 @@ firebase.auth().onAuthStateChanged((user) => {
   // ログイン状態が変化した
   if (user) {
     // ログイン済
+    currentUID = user.uid;
     onLogin();
   } else {
     // 未ログイン
+    currentUID = null;
     onLogout();
   }
 });
-
+  
+    
 // ログ���ンフォームが送信されたらログインする
-$('#login-form').on('submit', (e) => {
+$('#login-form-mordal').on('submit', (e) => {
   e.preventDefault();
 
-  const $loginButton = $('#login__submit-button');
+  const $loginButton = $('#submit_login_modal');
   $loginButton.text('送信中…');
 
-  const email = $('#login-email').val();
-  const password = $('#login-password').val();
+  const email = $('#login-email-modal').val();
+  const password = $('#login-password-modal').val();
 
   // ログインを試みる
+  // これまでの正常に動いていたlogin機能
+  
   firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
@@ -259,18 +357,64 @@ $('#login-form').on('submit', (e) => {
 
       // ログインフォームを初期状態に戻す
       resetLoginForm();
+      $('#login-modal').modal('hide');
     })
     .catch((error) => {
       // ログインに失敗したときの処理
       console.error('ログインエラー', error);
 
-      $('#login__help')
-        .text('ログインに失敗しました。')
-        .show();
-
+      if (error.code === 'auth/user-not-found') {
+        // 該当ユーザが存在しない場合は新規作成する
+        firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            // 作成成功
+            console.log('ユーザを作成しました');
+            // ログインに成功したときの処理
+            console.log('ログインしました。');
+            // ログインフォームを初期状態に戻す
+            resetLoginForm();
+            $('#login-modal').modal('hide');
+          })
+          .catch(catchErrorOnCreateUser);
+      } else {
+        catchErrorOnSignIn(error);
+      }
       // ログインボタンを元に戻す
       $loginButton.text('ログイン');
     });
+    
+    
+    
+  //ログインフォームの修正版
+  /*firebase
+    .auth()
+    .signInWithEmailAndPassword(email, password)
+    .catch((error) => {
+      // ログインに失敗したときの処理
+      console.log('ログイン失敗:', error);
+      if (error.code === 'auth/user-not-found') {
+        // 該当ユーザが存在しない場合は新規作成する
+        firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then(() => {
+            // 作成成功
+            console.log('ユーザを作成しました');
+            // ログインに成功したときの処理
+            console.log('ログインしました。');
+            // ログインフォームを初期状態に戻す
+            resetLoginForm();
+          })
+          .catch(catchErrorOnCreateUser);
+      } else {
+        catchErrorOnSignIn(error);
+      }
+      // ログインボタンを元に戻す
+      $loginButton.text('ログイン');
+    });
+    */
 });
 
 // ログアウトボタンが押されたらログアウトする
@@ -411,7 +555,7 @@ $('#map-form').on('submit', (e) => {
       };
       return firebase
         .database()
-        .ref('maps')
+        .ref(`/maps/${currentUID}/`)
         .push(mapData);
     })
     .then(() => {
@@ -604,4 +748,8 @@ var video = document.querySelector('#video');
 $('#closebutton').on('click', function() {
   // カメラへのアクセスを止める
   videoTracks.forEach(function(track) {track.stop()});
+});
+
+$('.login-button').click( function () {
+  $('#login-modal').modal('toggle');
 });

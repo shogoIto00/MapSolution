@@ -7,6 +7,22 @@
     margin-right: auto
 }
 
+.icon-template{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-item{
+    margin: auto;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#add-improvement__help {
+  display: none;
+}
+
 
 /* すべての画面を最初は表示しない */
 .view {
@@ -102,7 +118,8 @@
   color: white;
   height: 300px;
   background-color: black;
-  background-image: url("./images/banner.jpg");
+  background-image: url("./images/banner2.jpg");
+  background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   display: flex;
